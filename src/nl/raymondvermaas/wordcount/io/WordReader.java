@@ -10,20 +10,21 @@ import java.io.FilenameFilter;
 import java.util.List;
 import java.util.Scanner;
 
+
 /**
  *
  * @author Raymond
  */
-public class TextFileReader {
+public class WordReader {
     
     private File[] filelist;
     private Scanner in;
     private int currentfile;
     
-    public TextFileReader(String path) throws FileNotFoundException {
+    public WordReader(String path, String ext) throws FileNotFoundException {
         currentfile = 0;
         File dir = new File(path);
-        filelist = dir.listFiles(new TxtFilenameFilter());
+        filelist = dir.listFiles(new ExtFilenameFilter(ext));
         in = new Scanner(new FileReader(filelist[currentfile].getAbsolutePath()));
     }
     
@@ -55,13 +56,22 @@ public class TextFileReader {
         return filelist[currentfile].getName();
     }
     
+    public int numberOfFiles() {
+        return filelist.length;
+    }
+    
 }
+class ExtFilenameFilter implements FilenameFilter {
 
-class TxtFilenameFilter implements FilenameFilter {
-
+    private String ext;
+    
+    public ExtFilenameFilter (String ext) {
+        this.ext = ext;
+    }
+            
     @Override
     public boolean accept(File dir, String name) {
-        return (name.endsWith(".txt"));
+        return (name.endsWith("."+ext));
     }
     
 }

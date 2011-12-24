@@ -17,60 +17,51 @@ import nl.raymondvermaas.wordcount.table.*;
  */
 public class Main {
 
-    private static final String INPUTDIR = "C:\\Users\\Raymond\\Documents\\Mijn Huiswerk\\Master-1\\Datamining and Knowledge Discovery\\Papers";
+    private static String inputdir = "C:\\Papers";
     
-    private static final Filter[] FILTERS = { 
+    private static Filter[] filters= { 
         new BaseFilter(),
         new StopWordFilter(), 
-        new StemmingFilter("english")};
+        new StemmingFilter("english")
+    };
     
-    private static final String OUTPUTFILE = "d:\\output.csv";
+    private static String outputfile= "C:\\output.csv";
     
-    private static final int NUMDOCS = 26;
     
     public static void main(String[] args) {
-        String[] docList = new String[NUMDOCS];
-        CountTable ct = new CountTable(NUMDOCS);
-        try {
-            TextFileReader txt = new TextFileReader(INPUTDIR);
-            
-            int doc = 0;
-            String curdoc = "";
-            
-            String in = txt.getNext();
-            while(in != null) {
-                if(curdoc.compareTo("") == 0 || curdoc.compareTo(txt.getCurrentFile()) != 0) {
-                    curdoc = txt.getCurrentFile();
-                    doc++;
-                    docList[doc] = curdoc;
-                }
-                
-                for(Filter f : FILTERS) {
-                    in = f.filter(in);
-                    if(in == null)
-                        break;
-                }
-                
-                if(in == null) {
-                    in = txt.getNext();
-                    continue;
-                }
-                ct.add(doc, in);
-                in = txt.getNext();
-            }
-            
-            ct.prune((float) 0.1, (float) 0.1);
-            
-            CsvWriter csv = new CsvWriter(OUTPUTFILE, docList);
-            CountObject out = ct.iterateWord();
-            while (out!=null) {
-                csv.write(out);
-                out = ct.iterateWord();
-            }
-            csv.close();
-            
-        } catch (Exception ex) {
-            Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
-        }
+       if(args.length < 1 || args[0].compareTo("help") == 0);
+           Main.usage();
+       try {
+           inputdir = args[0];
+           outputfile = args[1];
+           if(args[2].compareTo("-f") == 0) {
+               filters = new Filter[(args.length-3)];
+               for(int i=3;i<args.length;i++) {
+                   Class c = Class.forName(args[i]);
+                   filters[(i-3)] = (Filter) c.newInstance();
+               }
+           }
+       } catch (Exception ex) {
+           Main.usage();
+           
+       }
+       
+       WordCount wc = new WordCount(inputdir, outputfile, filters);
+       wc.run();       
     }
+
+    private static void usage() {
+        System.out.println("wordcount INPUTDIR OUTPUTFILE [-f nl.raymondvermaas.wordcount.filter]\n");
+        System.out.println("INPUTDIR");
+        System.out.println("\tThe location of the documents");
+        System.out.println("OUTPUTFILE\t");
+        System.out.println("\tThe location of the output CSV file");
+        System.out.println("-f nl.raymondvermaas.wordcount.filter");
+        System.out.println("\tThe filters to run in the right order. Possible filters are");
+        System.out.println("\tnl.raymondvermaas.wordcount.BaseFilter ; nl.raymondvermaas.wordcount.StopWordFilter");
+        System.out.println("\tnl.raymondvermaas.wordcount.StemmingFilter ; nl.raymondvermaas.wordcount.LemmaFilter");
+        System.exit(0);
+    }
+    
+    
 }

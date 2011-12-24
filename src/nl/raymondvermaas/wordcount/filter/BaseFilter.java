@@ -18,6 +18,10 @@ public class BaseFilter implements Filter {
         word = word.toLowerCase();
         //remove non-word characters
         word = word.replaceAll("\\W", ""); 
+        //remove words that only contain digits
+        word = word.replaceAll("\\d+", "");
+        //remove to long words
+        word = word.length() <= 32 ? word : "";
         //Omit single characters and empty strings
         if(word.length() <= 1)
             return null;

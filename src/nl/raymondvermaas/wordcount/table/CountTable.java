@@ -4,11 +4,7 @@
  */
 package nl.raymondvermaas.wordcount.table;
 
-import nl.raymondvermaas.wordcount.table.CountObject;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  *
@@ -18,12 +14,10 @@ public class CountTable {
 
     private HashMap<String, CountObject> countTable;
     private int numDocs;
-    private Iterator itw;
     
     public CountTable(int numDocs) {
         countTable= new HashMap<String, CountObject>();
         this.numDocs=numDocs;
-        itw =null;
     }
     
     public void add(int document, String word) {
@@ -38,50 +32,27 @@ public class CountTable {
             
     }
     
-    public CountObject iterateWord() {
-        if(itw==null)          
-            itw = countTable.values().iterator();
-        if (itw.hasNext())
-            return (CountObject) itw.next();
-        itw = null;
-        return null;          
+    public int get(int document, String word) {
+        return countTable.get(word).get(document);
     }
     
-    public void prune(float topPercent, float bottomPercent) {
-        TotalComparator tc =  new TotalComparator(countTable);
-        TreeMap<String, CountObject> sortedMap = new TreeMap<String, CountObject>(tc);
-        sortedMap.putAll(countTable);
-        int top = Math.round(topPercent*sortedMap.size());
-        int bottom = Math.round((1-bottomPercent)*sortedMap.size());
-        
-        int i=0;
-        for (String key : sortedMap.keySet()) {
-            if(i<=top || i>=bottom )
-                countTable.remove(key);
-            i++;          
+    public String[] getWords() {
+       return (String[]) countTable.keySet().toArray(new String[1]);
+    }
+    
+    
+    public void prune(int threshold) {        
+        Iterator it = countTable.values().iterator();
+        ArrayList<String> delete = new ArrayList<String>();
+        while(it.hasNext()) {
+            CountObject co = (CountObject) it.next();
+            if(co.getTotal() < threshold)
+                delete.add(co.getWord());
         }
-
+        
+        for(Object del : delete.toArray())
+            countTable.remove((String) del);
     }
-}
-
-class TotalComparator implements Comparator {
-
-  HashMap<String, CountObject> map;
-  public TotalComparator(HashMap<String, CountObject> map) {
-      this.map = map;
-  }
-
-    @Override
-  public int compare(Object a, Object b) {
-
-    if((Integer) map.get(a).getTotal() < (Integer)map.get(b).getTotal()) {
-      return 1;
-    } else if((Integer) map.get(a).getTotal() == (Integer)map.get(b).getTotal()) {
-      return 0;
-    } else {
-      return -1;
-    }
-  }
 }
 
 

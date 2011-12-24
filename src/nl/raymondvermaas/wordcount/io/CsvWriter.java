@@ -7,7 +7,7 @@ package nl.raymondvermaas.wordcount.io;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import nl.raymondvermaas.wordcount.table.CountObject;
+import nl.raymondvermaas.wordcount.table.CountTable;
 
 /**
  *
@@ -15,21 +15,30 @@ import nl.raymondvermaas.wordcount.table.CountObject;
  */
 public class CsvWriter {
     private BufferedWriter bw;
+    private String[] docs;
+    private String SEP = ";";
     
     public CsvWriter(String filepath, String[] docs) throws IOException {
         bw = new BufferedWriter(new FileWriter(filepath));
-        bw.write("-");
-        for(String doc:docs) {
-            bw.write(";" + doc);
-        }
-        bw.newLine();
+        this.docs = docs;
     }
     
-    public void write(CountObject co) throws IOException {
-        bw.write(co.getWord());
-        for(int i:co.getDocCount())
-            bw.write(";"+i);
+    public void writeToFile(CountTable ct) throws IOException {
+        String[] words = ct.getWords();
+        for(String word : words) {
+            bw.write(SEP+word);
+            
+        }
         bw.newLine();
+        
+        int i = 0;
+        for (String doc : docs) {
+            bw.write(doc);
+            for (String word : words)
+                bw.write(SEP+ct.get(i, word));
+            bw.newLine();
+            i++;
+        }
     }
     
     public void close() throws IOException {

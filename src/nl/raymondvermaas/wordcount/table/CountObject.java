@@ -47,5 +47,9 @@ public class CountObject {
     public void setWord(String word) {
         this.word = word;
     }
+
+    public int get(int document) {
+        return docCount[document];
+    }
     
 }

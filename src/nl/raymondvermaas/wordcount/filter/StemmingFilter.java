@@ -24,6 +24,15 @@ public class StemmingFilter implements Filter{
         }
     }
     
+    public StemmingFilter() {
+        try {
+            Class stemClass = Class.forName("org.tartarus.snowball.ext.english.Stemmer");
+            this.stemmer = (SnowballStemmer) stemClass.newInstance();
+        } catch (Exception ex) {
+            Logger.getLogger(StemmingFilter.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     @Override
     public String filter(String word) {
         stemmer.setCurrent(word);
